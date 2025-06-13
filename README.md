@@ -1,5 +1,5 @@
 ## AI Mentor - Installation Guide
-LLM Wrapper Mentor is an AI-powered teaching assistant that helps IIT Bombay mentors generate comprehensive learning materials for technical interview preparation. The tool creates three types of documents for any given topic:
+LLM Wrapper Mentor is an AI-powered teaching assistant that helps mentors generate comprehensive learning materials for technical interview preparation. The tool creates three types of documents for any given topic:
 
 1. **Pre-Class Materials** - Preparation documents for students
 2. **In-Class Lesson Plans** - Detailed teaching guides
