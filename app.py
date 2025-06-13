@@ -13,7 +13,7 @@ import re
 
 def get_db_path():
     if 'streamlit' in os.getcwd():  # Detect if running in Streamlit Cloud
-        return '/tmp/prepclass.db'  # Use /tmp which has write permissions
+        return '/tmp/prepclass.db'  
     return 'prepclass.db'  # Local development path
 
 
@@ -76,25 +76,23 @@ def authenticate_user(username, password):
 
 # History database functions
 def save_history_to_db(username, topic, difficulty, content):
-    conn = sqlite3.connect('prepclass.db')
+    conn = sqlite3.connect(get_db_path())
     c = conn.cursor()
     
-    # Check if topic exists for this user
+    # Check if topic exists for this specific user
     c.execute('''SELECT id FROM history 
                  WHERE username=? AND topic=?''', (username, topic))
     exists = c.fetchone()
     
     if exists:
-        # Update existing entry
         c.execute('''UPDATE history SET 
                     difficulty=?, timestamp=?, 
                     pre_class=?, in_class=?, post_class=?
-                    WHERE id=?''',
+                    WHERE username=? AND id=?''',
                  (difficulty, datetime.now().strftime("%Y-%m-%d %H:%M"),
                   content["pre_class"], content["in_class"], content["post_class"],
-                  exists[0]))
+                  username, exists[0]))
     else:
-        # Insert new entry
         c.execute('''INSERT INTO history 
                     (username, topic, difficulty, timestamp, pre_class, in_class, post_class)
                     VALUES (?, ?, ?, ?, ?, ?, ?)''',
@@ -105,13 +103,14 @@ def save_history_to_db(username, topic, difficulty, content):
     conn.commit()
     conn.close()
 
+# Load history for every user separately
 def load_history_from_db(username):
-    conn = sqlite3.connect('prepclass.db')
+    conn = sqlite3.connect(get_db_path())
     c = conn.cursor()
     c.execute('''SELECT topic, difficulty, timestamp, 
                 pre_class, in_class, post_class 
                 FROM history WHERE username=? 
-                ORDER BY timestamp DESC''', (username,))
+                ORDER BY timestamp DESC''', (username,))  # Added username filter
     history = {}
     for row in c.fetchall():
         topic, difficulty, timestamp, pre_class, in_class, post_class = row
@@ -165,8 +164,9 @@ def auth_ui():
 # Main App
 def main_app():
     # Initialize session state for history
-    if 'history' not in st.session_state:
+    if 'history' not in st.session_state or st.session_state.get('current_user') != st.session_state.username:
         st.session_state.history = load_history_from_db(st.session_state.username)
+        st.session_state.current_user = st.session_state.username
     
     if 'current_topic' not in st.session_state:
         st.session_state.current_topic = None
