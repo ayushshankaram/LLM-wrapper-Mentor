@@ -126,7 +126,7 @@ def load_history_from_db(username):
 
 # Authentication UI
 def auth_ui():
-    st.title("PrepClass Mentor Login")
+    st.title("Cantiliver AI Mentor Login")
     with st.container():
         tab1, tab2 = st.tabs(["Login", "Sign Up"])
         
